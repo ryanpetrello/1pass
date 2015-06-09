@@ -35,10 +35,13 @@ class Keychain(object):
             if len(matches) > 1:
                 for i, m in enumerate(matches):
                     sys.stderr.write('[%s] %s\n' % (i, m[0]))
-                match = int(raw_input())
+                sys.stdin = open('/dev/tty')
+                try:
+                    exact_name = matches[int(raw_input())][0]
+                except:
+                    return None
             else:
-                match = 0
-            exact_name = matches[match][0]
+                exact_name = matches[0][0]
             item = self._items[exact_name]
             item.decrypt_with(self)
             return item

@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from fuzzywuzzy import process
 
 from onepassword.encryption_key import EncryptionKey
@@ -25,13 +26,19 @@ class Keychain(object):
         matching. ``fuzzy_threshold`` can be an integer between 0 and
         100, where 100 is an exact match.
         """
-        match = process.extractOne(
+        matches = process.extractBests(
             name,
             self._items.keys(),
             score_cutoff=(fuzzy_threshold-1),
         )
-        if match:
-            exact_name = match[0]
+        if matches:
+            if len(matches) > 1:
+                for i, m in enumerate(matches):
+                    sys.stderr.write('[%s] %s\n' % (i, m[0]))
+                match = int(raw_input())
+            else:
+                match = 0
+            exact_name = matches[match][0]
             item = self._items[exact_name]
             item.decrypt_with(self)
             return item
